@@ -1,0 +1,2 @@
+# Basic dependencies for Monopoly game
+# Add any required packages here
