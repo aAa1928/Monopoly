@@ -1,13 +1,43 @@
 from random import randint
 
 class Player:
+
     def __init__(self, name: str):
         self.name = name
-        self.cash = 1500
+        self._cash = 1500
+        
         self.position = 0
-        self.doubles_rolled = 0
+        self._doubles_rolled = 0
         self.properties = NotImplemented
-        self.in_jail = False
+        self._in_jail: int = 0
+        self.is_active = False
+
+    @property
+    def cash(self):
+        return self._cash
+        
+    @cash.setter
+    def cash(self, amount):
+        self._cash = amount
+
+    @property
+    def in_jail(self):
+        return self._in_jail
+    
+    @in_jail.setter
+    def in_jail(self, value):
+        self._in_jail = value
+        if value == 1:
+            self.doubles_rolled = 0
+            self.position = 10
+
+    @property
+    def doubles_rolled(self):
+        return self._doubles_rolled
+    
+    @doubles_rolled.setter
+    def doubles_rolled(self, value):
+        self._doubles_rolled = value
 
     def add_cash(self, amount):
         self.cash += amount
