@@ -6,7 +6,7 @@ class Player:
         self.name = name
         self._cash = 1500
         
-        self.position = 0
+        self._position = 0
         self._doubles_rolled = 0
         self.properties = NotImplemented
         self._in_jail: int = 0
@@ -21,6 +21,14 @@ class Player:
         self._cash = amount
 
     @property
+    def doubles_rolled(self):
+        return self._doubles_rolled
+    
+    @doubles_rolled.setter
+    def doubles_rolled(self, value):
+        self._doubles_rolled = value
+
+    @property
     def in_jail(self):
         return self._in_jail
     
@@ -32,15 +40,17 @@ class Player:
             self.position = 10
 
     @property
-    def doubles_rolled(self):
-        return self._doubles_rolled
+    def position(self):
+        return self._position
     
-    @doubles_rolled.setter
-    def doubles_rolled(self, value):
-        self._doubles_rolled = value
-
-    def add_cash(self, amount):
-        self.cash += amount
+    @position.setter
+    def position(self, new_val):
+        # Trigger Pass Go only if explicitly passing the 40 threshold
+        if new_val >= 40:
+            self.cash += 200
+            print(f"{self.name} passed Go! Collected $200.")
+        
+        self._position = new_val % 40
 
     def __str__(self):
         return f"{self.name}: ${self.cash}"

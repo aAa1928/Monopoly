@@ -40,8 +40,7 @@ class OwnableSpace(Space):
         super().on_land(player)
         if self.owner is not None and self.owner != player and not self.is_mortgaged:
             rent = self.get_rent()
-            player.add_cash(-rent)
-            self.owner.add_cash(rent)
+            raise NotImplementedError("Rent payment logic not implemented yet.")
 
 class Property(OwnableSpace):
     def __init__(self, name: str, position: int, price: int, rent: int):
@@ -76,7 +75,7 @@ class Tax(Space):
 
     def on_land(self, player: "Player") -> None:
         super().on_land(player)
-        player.add_cash(-self.tax)
+        raise NotImplementedError("Tax payment logic not implemented yet.")
 
 class Chance(Space):
     def __init__(self, name: str, position: int):
