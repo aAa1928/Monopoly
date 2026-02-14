@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
@@ -18,13 +19,19 @@ __all__ = [
     "Go",
 ]
 
-class Space:
+class Space(ABC):
     def __init__(self, name: str, position: int):
         self.name = name
         self.position = position
 
+    @abstractmethod
     def on_land(self, player: "Player") -> None:
+        """Called when a player lands on this space."""
         print(f"{player.name} landed on {self.name}")
+
+    def __str__(self):
+        return self.name
+
 
 class OwnableSpace(Space):
     def __init__(self, name: str, position: int, price: int):
@@ -42,6 +49,7 @@ class OwnableSpace(Space):
             rent = self.get_rent()
             raise NotImplementedError("Rent payment logic not implemented yet.")
 
+
 class Property(OwnableSpace):
     def __init__(self, name: str, position: int, price: int, rent: int):
         super().__init__(name, position, price)
@@ -54,12 +62,14 @@ class Property(OwnableSpace):
             return self.base_rent * 5
         return self.base_rent * (self.houses + 1)
 
+
 class Utility(OwnableSpace):
     def __init__(self, name: str, position: int):
         super().__init__(name, position, 150)
 
     def get_rent(self, dice_roll: int = 0) -> int:
         return dice_roll * 4
+
 
 class Railroad(OwnableSpace):
     def __init__(self, name: str, position: int):
@@ -68,6 +78,7 @@ class Railroad(OwnableSpace):
     def get_rent(self, dice_roll: int = 0) -> int:
         return 25
 
+
 class Tax(Space):
     def __init__(self, name: str, position: int, tax: int):
         super().__init__(name, position)
@@ -75,28 +86,54 @@ class Tax(Space):
 
     def on_land(self, player: "Player") -> None:
         super().on_land(player)
-        raise NotImplementedError("Tax payment logic not implemented yet.")
+        print(f"{player.name} owes ${self.tax} in taxes.")
+        player.cash -= self.tax
+
 
 class Chance(Space):
     def __init__(self, name: str, position: int):
         super().__init__(name, position)
 
+    def on_land(self, player: "Player") -> None:
+        super().on_land(player)
+
+
 class CommunityChest(Space):
     def __init__(self, name: str, position: int):
         super().__init__(name, position)
+
+    def on_land(self, player: "Player") -> None:
+        super().on_land(player)
+
 
 class GoToJail(Space):
     def __init__(self, name: str, position: int):
         super().__init__(name, position)
 
+    def on_land(self, player: "Player") -> None:
+        super().on_land(player)
+        player.in_jail = 1
+
+
 class Jail(Space):
     def __init__(self, name: str, position: int):
         super().__init__(name, position)
+
+    def on_land(self, player: "Player") -> None:
+        super().on_land(player)
+
 
 class FreeParking(Space):
     def __init__(self, name: str, position: int):
         super().__init__(name, position)
 
+    def on_land(self, player: "Player") -> None:
+        super().on_land(player)
+
+
 class Go(Space):
     def __init__(self, name: str, position: int):
         super().__init__(name, position)
+
+    def on_land(self, player: "Player") -> None:
+        super().on_land(player)

@@ -1,11 +1,7 @@
 from space import *
 
 class Board:
-    def __init__(self):
-        self.spaces = self._build_board()
-
-    def _build_board(self):
-        return [
+    spaces: tuple[Space, ...] = (
             Go("Go", 0),
             Property("Mediterranean Avenue", 1, 60, 2),
             CommunityChest("Community Chest", 2),
@@ -46,7 +42,8 @@ class Board:
             Property("Park Place", 37, 350, 35),
             Tax("Luxury Tax", 38, 100),
             Property("Boardwalk", 39, 400, 50)
-        ]
+        )
 
-    def get_space(self, position):
-        return self.spaces[position]
+    @classmethod
+    def get_space(cls, position: int) -> Space:
+        return cls.spaces[position]

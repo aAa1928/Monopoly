@@ -18,30 +18,17 @@ if __name__ == "__main__":
                 else:
                     sleep(1)
                 
-                roll = player.roll_dice()
-                
-                if player.in_jail:
-                    player.in_jail += 1
-                    if roll[1]:  # Rolled doubles
-                        player.in_jail = 0
-                        player.position = player.position + roll[0]
-                    elif player.in_jail > 3:  # 3 rolls completed
-                        player.in_jail = 0
-                        player.position = player.position + roll[0]
-                    else:
-                        print(f"{player.name} rolled a {roll[0]} but remains in jail\n")
-                        break
-                else:
-                    player.position = player.position + roll[0]
-                    
-                    if player.doubles_rolled == 3:
-                        player.in_jail = 1
+                roll_total, is_double, space = player.move()
+
+                if space is None:
+                    if is_double and player.in_jail:
                         print(f"{player.name} rolled 3 doubles in a row and goes to jail!\n")
-                        break
-                
-                space = game.board.get_space(player.position)
-                print(f"{player.name} rolled a {roll[0]} {'(double) ' if roll[1] else ''}and landed on {space.name} ({player.position})")
+                    else:
+                        print(f"{player.name} rolled a {roll_total} but remains in jail\n")
+                    break
+
+                print(f"{player.name} rolled a {roll_total} {'(double) ' if is_double else ''}and landed on {space} ({player.position})")
                 print(player, end="\n\n")
 
-                if not roll[1]:
+                if not is_double:
                     break

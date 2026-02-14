@@ -1,23 +1,29 @@
 from random import randint
+from typing import TYPE_CHECKING, Optional
+
+from board import Board
+
+if TYPE_CHECKING:
+    from space import Space
 
 class Player:
 
     def __init__(self, name: str):
         self.name = name
         self._cash = 1500
-        
-        self._position = 0
+
+        self.position = 0
         self._doubles_rolled = 0
         self.properties = NotImplemented
         self._in_jail: int = 0
-        self.is_active = False
+        self.bankrupt: bool = False
 
     @property
-    def cash(self):
+    def cash(self) -> int:
         return self._cash
         
     @cash.setter
-    def cash(self, amount):
+    def cash(self, amount: int):
         self._cash = amount
 
     @property
@@ -38,22 +44,40 @@ class Player:
         if value == 1:
             self.doubles_rolled = 0
             self.position = 10
+        
+    def _advance_and_land(self, spaces: int) -> "Space":
+        new_position = self.position + spaces
 
-    @property
-    def position(self):
-        return self._position
-    
-    @position.setter
-    def position(self, new_val):
-        # Trigger Pass Go only if explicitly passing the 40 threshold
-        if new_val >= 40:
+        if new_position >= 40:
             self.cash += 200
             print(f"{self.name} passed Go! Collected $200.")
-        
-        self._position = new_val % 40
 
-    def __str__(self):
-        return f"{self.name}: ${self.cash}"
+        self.position = new_position % 40
+        space = Board.get_space(self.position)
+        space.on_land(self)
+        return space
+
+    def move(self) -> tuple[int, bool, Optional["Space"]]:
+        roll_total, is_double = self.roll_dice()
+
+        if self.in_jail:
+            self.in_jail += 1
+            if is_double:
+                self.in_jail = 0
+                return roll_total, is_double, self._advance_and_land(roll_total)
+
+            if self.in_jail > 3:
+                self.in_jail = 0
+                self.cash -= 50
+                return roll_total, is_double, self._advance_and_land(roll_total)
+
+            return roll_total, is_double, None
+
+        if self.doubles_rolled == 3:
+            self.in_jail = 1
+            return roll_total, is_double, None
+
+        return roll_total, is_double, self._advance_and_land(roll_total)
     
     def roll_dice(self) -> tuple[int, bool]:
         rolls = [randint(1, 6) for _ in range(2)]
@@ -63,3 +87,6 @@ class Player:
         else:
             self.doubles_rolled = 0
         return sum(rolls), is_double
+
+    def __str__(self):
+        return f"{self.name}: ${self.cash}"
