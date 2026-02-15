@@ -1,6 +1,6 @@
-from game import Game, Player
-
 from time import sleep
+
+from game import Game, Player
 
 if __name__ == "__main__":
 
@@ -29,6 +29,14 @@ if __name__ == "__main__":
 
                 print(f"{player.name} rolled a {roll_total} {'(double) ' if is_double else ''}and landed on {space} ({player.position})")
                 print(player, end="\n\n")
+
+                # Handle property purchase
+                if hasattr(space, 'owner') and space.owner is None and hasattr(space, 'price'): # pyright: ignore[reportAttributeAccessIssue]
+                    if player_index == 0:
+                        choice = input(f"Buy {space} for ${space.price}? (y/n): ").lower() # pyright: ignore[reportAttributeAccessIssue]
+                        if choice == 'y':
+                            game.buy_property(player, space)  # pyright: ignore[reportArgumentType]
+                    print()
 
                 if not is_double:
                     break

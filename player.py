@@ -4,27 +4,22 @@ from typing import TYPE_CHECKING, Optional
 from board import Board
 
 if TYPE_CHECKING:
-    from space import Space
+    from game import Game
+    from space import Card, Space, OwnableSpace
 
 class Player:
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None: # pyright: ignore[reportGeneralTypeIssues]
         self.name = name
-        self._cash = 1500
+        self.game: Game = None  # type: ignore
+        self.cash = 1500
 
         self.position = 0
         self._doubles_rolled = 0
-        self.properties = NotImplemented
+        self.properties: list[OwnableSpace] = []
+        self.cards: list[Card] = []
         self._in_jail: int = 0
         self.bankrupt: bool = False
-
-    @property
-    def cash(self) -> int:
-        return self._cash
-        
-    @cash.setter
-    def cash(self, amount: int):
-        self._cash = amount
 
     @property
     def doubles_rolled(self):
@@ -45,7 +40,15 @@ class Player:
             self.doubles_rolled = 0
             self.position = 10
         
+    @property
+    def space(self) -> "Space":
+        return self.game.board.get_space(self.position)
+
+
     def _advance_and_land(self, spaces: int) -> "Space":
+        if self.game is None:
+            raise ValueError("Player must be associated with a game to move.")
+        
         new_position = self.position + spaces
 
         if new_position >= 40:
@@ -53,15 +56,16 @@ class Player:
             print(f"{self.name} passed Go! Collected $200.")
 
         self.position = new_position % 40
-        space = Board.get_space(self.position)
+        space = self.game.board.get_space(self.position)
         space.on_land(self)
         return space
 
     def move(self) -> tuple[int, bool, Optional["Space"]]:
-        roll_total, is_double = self.roll_dice()
-
         if self.in_jail:
+            roll_total, is_double = self.roll_dice()
+            self.last_roll_total = roll_total
             self.in_jail += 1
+            
             if is_double:
                 self.in_jail = 0
                 return roll_total, is_double, self._advance_and_land(roll_total)
@@ -72,6 +76,9 @@ class Player:
                 return roll_total, is_double, self._advance_and_land(roll_total)
 
             return roll_total, is_double, None
+
+        roll_total, is_double = self.roll_dice()
+        self.last_roll_total = roll_total
 
         if self.doubles_rolled == 3:
             self.in_jail = 1
