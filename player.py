@@ -42,7 +42,7 @@ class Player:
         
     @property
     def space(self) -> "Space":
-        return self.game.board.get_space(self.position)
+        return self.game.board[self.position]
 
 
     def _advance_and_land(self, spaces: int) -> "Space":
@@ -56,7 +56,7 @@ class Player:
             print(f"{self.name} passed Go! Collected $200.")
 
         self.position = new_position % 40
-        space = self.game.board.get_space(self.position)
+        space = self.game.board[self.position]
         space.on_land(self)
         return space
 

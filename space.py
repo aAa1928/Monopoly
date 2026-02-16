@@ -48,20 +48,39 @@ class OwnableSpace(Space):
 
     def on_land(self, player: "Player") -> None:
         super().on_land(player)
-        if self.owner is not None and self.owner != player and not self.is_mortgaged:
-            raise NotImplementedError("Rent payment logic not implemented yet.")
 
 
 class Property(OwnableSpace):
-    def __init__(self, name: str, position: int, price: int, rent: int, color: str):
+    def __init__(self, name: str, position: int, price: int, rent_values: list[int], color: str):
         super().__init__(name, position, price)
-        self.base_rent = rent
-        self.houses: int = 0
-        self.color: str = color
-        self.hotel: bool = False
+        # rent_values would be [Base, 1H, 2H, 3H, 4H, Hotel]
+        self.rent_values = rent_values 
+        self.houses = 0
+        self.color = color
+        self.hotel = False
+
+    @property
+    def rent(self) -> int:
+        if self.hotel:
+            return self.rent_values[5]
+        if self.houses > 0:
+            return self.rent_values[self.houses]
+        
+        base_rent = self.rent_values[0]
+        if self.owner:
+            
+            owned_in_group = [p for p in self.owner.properties 
+                            if isinstance(p, Property) and p.color == self.color]
+            
+            if len(owned_in_group) == self.owner.game.board.get_color_group_size(self.color):
+                return base_rent * 2
+                
+        return base_rent
     
     def on_land(self, player: "Player") -> None:
-        pass
+        super().on_land(player)
+        if self.owner is not None and self.owner != player and not self.is_mortgaged:
+            player.game.pay(player, self.rent, self.owner)
 
 
 class Utility(OwnableSpace):
@@ -78,6 +97,7 @@ class Utility(OwnableSpace):
         return 10 if count == 2 else 4
 
     def on_land(self, player: "Player") -> None:
+        super().on_land(player)
         if self.owner is not None and self.owner != player and not self.is_mortgaged:
             player.game.pay(player, self.util_multiplier * player.last_roll_total, self.owner)
 
@@ -94,6 +114,7 @@ class Railroad(OwnableSpace):
         return 25 * (2 ** (count - 1)) if count > 0 else 0
 
     def on_land(self, player: "Player") -> None:
+        super().on_land(player)
         if self.owner is not None and self.owner != player and not self.is_mortgaged:
             player.game.pay(player, self.rent, self.owner)
 
@@ -104,9 +125,6 @@ class Tax(Space):
         self.tax = tax
 
     def on_land(self, player: "Player") -> None:
-        if not player.game:
-            raise ValueError("Game instance is required to process tax payment.")
-        
         super().on_land(player)
         print(f"{player.name} owes ${self.tax} in taxes.")
         player.game.pay(player, self.tax)

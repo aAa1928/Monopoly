@@ -5,7 +5,7 @@ from game import Game, Player
 if __name__ == "__main__":
 
     game = Game(players=[Player('A'), Player('B')])
-
+    
     while game.players:
         for player_index, player in enumerate(game.players):
             while player:
