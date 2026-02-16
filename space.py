@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from itertools import count
-from typing import TYPE_CHECKING, Optional
+from typing import Literal, TYPE_CHECKING, Optional
 
 import game
 
@@ -51,7 +51,9 @@ class OwnableSpace(Space):
 
 
 class Property(OwnableSpace):
-    def __init__(self, name: str, position: int, price: int, rent_values: list[int], color: str):
+    def __init__(self, name: str, position: int, price: int, rent_values: list[int], 
+                 color: Literal["brown", "light_blue", "pink", "orange", "red", "yellow", 
+                                "green", "blue"]):
         super().__init__(name, position, price)
         # rent_values would be [Base, 1H, 2H, 3H, 4H, Hotel]
         self.rent_values = rent_values 
