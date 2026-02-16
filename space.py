@@ -79,7 +79,6 @@ class Utility(OwnableSpace):
 
     def on_land(self, player: "Player") -> None:
         if self.owner is not None and self.owner != player and not self.is_mortgaged:
-            print(player, player.game)
             player.game.pay(player, self.util_multiplier * player.last_roll_total, self.owner)
 
 
@@ -87,9 +86,16 @@ class Railroad(OwnableSpace):
     def __init__(self, name: str, position: int):
         super().__init__(name, position, 200)
 
+    @property
+    def rent(self) -> int:
+        if self.owner is None:
+            return 0
+        count = len([s for s in self.owner.properties if isinstance(s, Railroad)])
+        return 25 * (2 ** (count - 1)) if count > 0 else 0
+
     def on_land(self, player: "Player") -> None:
         if self.owner is not None and self.owner != player and not self.is_mortgaged:
-            raise NotImplementedError("Railroad rent logic not implemented yet.")
+            player.game.pay(player, self.rent, self.owner)
 
 
 class Tax(Space):
